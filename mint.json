@@ -40,7 +40,7 @@
     },
     {
       "group": "Quickstart Guides",
-      "pages": ["guides/connecting-wallet"]
+      "pages": ["quickstart-guides/connecting-wallet", "quickstart-guides/signing-messages", "quickstart-guides/erc20-token"]
     }
   ],
   "modeToggle": {

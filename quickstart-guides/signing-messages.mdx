@@ -1,0 +1,34 @@
+---
+title: 'Signing Messages'
+description: 'Get started with signing messages using the sequence provider'
+---
+
+
+```ts
+// Get the wallet provider and signer instances
+const wallet = sequence.getWallet()
+const provider = wallet.getProvider()
+const signer = wallet.getSigner()
+
+// Prepare the message string
+const message = `I've been to web3 & back again :D`
+
+// Sign the message
+const signature = await signer.signMessage(message)
+console.log('message signature:', signature)
+
+// Validate the signed message. The sequence utils `isValidMessageSignature` method
+// supports validating both EOA and Smart Wallet (EIP1271 + EIP6492)
+// signatures with this simple call.
+const isValid = await wallet.utils.isValidMessageSignature(
+  await wallet.getAddress(),
+  message,
+  signature,
+  provider.getChainId()
+)
+
+console.log('isValid?', isValid)
+if (!isValid) throw new Error('signature is invalid')
+```
+
+To learn more, please see our wallet guide on [signing & verifying messages](/wallet/guides/sign-message).
