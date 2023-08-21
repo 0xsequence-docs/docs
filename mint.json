@@ -41,6 +41,10 @@
     {
       "group": "Quickstart Guides",
       "pages": ["quickstart-guides/connecting-wallet", "quickstart-guides/signing-messages", "quickstart-guides/erc20-token"]
+    },
+    {
+      "group": "Wallet",
+      "pages": ["wallet/introduction", "wallet/installation", "wallet/platforms"]
     }
   ],
   "modeToggle": {
