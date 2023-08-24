@@ -80,6 +80,13 @@
                     "wallet/wallet-contracts/11-wallet-context", "wallet/wallet-contracts/12-contract-audits"]
         }
       ]
+    },
+    {
+      "group": "Indexer",
+      "pages": ["indexer/01-overview", "indexer/02-installation",
+                "indexer/03-fetch-tokens", "indexer/04-transaction-history",
+                "indexer/05-unique-tokens", "indexer/06-transaction-history-token-contract",
+                "indexer/07-native-network-balance"]
     }
   ],
   "modeToggle": {
