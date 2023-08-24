@@ -44,7 +44,42 @@
     },
     {
       "group": "Wallet",
-      "pages": ["wallet/introduction", "wallet/installation", "wallet/platforms"]
+      "pages": [
+        "wallet/introduction", 
+        "wallet/installation", 
+        "wallet/platforms",
+        {
+          "group": "Wallet Guides",
+          "pages": ["wallet/guides/01-connect-wallet", "wallet/guides/02-auth-address",
+                    "wallet/guides/03-sign-message", "wallet/guides/04-session-keys",
+                    "wallet/guides/05-send-transaction", "wallet/guides/06-send-erc20",
+                    "wallet/guides/07-send-erc721", "wallet/guides/08-send-erc1155",
+                    "wallet/guides/09-send-batch-transactions", "wallet/guides/10-building-backends",
+                    "wallet/guides/11-using-testnets"]
+        },
+        {
+          "group": "Wallet Connectors",
+          "pages": ["wallet/wallet-connectors/00-overview", "wallet/wallet-connectors/01-wagmi",
+                    "wallet/wallet-connectors/02-rainbow-kit", "wallet/wallet-connectors/03-web3modal",
+                    "wallet/wallet-connectors/04-web3-onboard", "wallet/wallet-connectors/05-web3-react-v6",
+                    "wallet/wallet-connectors/06-FAQ"]
+        },
+        {
+          "group": "Key Management",
+          "pages": ["wallet/key-management/01-overview", "wallet/key-management/02-social-login-wallets",
+                    "wallet/key-management/03-web3-login", "wallet/key-management/04-backup-key"]
+        },
+        "wallet/fiat-support",
+        {
+          "group": "Wallet Contracts",
+          "pages": ["wallet/wallet-contracts/01-why", "wallet/wallet-contracts/02-universal-deployer",
+                    "wallet/wallet-contracts/03-wallet-factory", "wallet/wallet-contracts/04-wallet-configuration",
+                    "wallet/wallet-contracts/05-modules-and-updates", "wallet/wallet-contracts/06-main-module-upgradeable",
+                    "wallet/wallet-contracts/07-transaction-encoding", "wallet/wallet-contracts/08-signature-encoding",
+                    "wallet/wallet-contracts/09-nested-transaction-batching", "wallet/wallet-contracts/10-guest-module",
+                    "wallet/wallet-contracts/11-wallet-context", "wallet/wallet-contracts/12-contract-audits"]
+        }
+      ]
     }
   ],
   "modeToggle": {
