@@ -87,6 +87,32 @@
                 "indexer/03-fetch-tokens", "indexer/04-transaction-history",
                 "indexer/05-unique-tokens", "indexer/06-transaction-history-token-contract",
                 "indexer/07-native-network-balance"]
+    },
+    {
+      "group": "Metadata",
+      "pages": ["metadata/01-overview", "metadata/02-installation",
+                "metadata/03-token-metadata", "metadata/04-contract-metadata",
+                "metadata/05-rest-api"]
+    },
+    {
+      "group": "Relayer",
+      "pages": ["relayer/01-overview", "relayer/02-building-relaying-server"]
+    },
+    {
+      "group": "Games SDK",
+      "pages": ["games-sdk/overview"]
+    },
+    {
+      "group": "Node Gateway",
+      "pages": ["node-gateway/01-overview"]
+    },
+    {
+      "group": "Marketplace",
+      "pages": ["marketplace/01-overview"]
+    },
+    {
+      "group": "Community and Support",
+      "pages": ["community-and-support/contact", "community-and-support/02-migrate-1-1-0"]
     }
   ],
   "modeToggle": {

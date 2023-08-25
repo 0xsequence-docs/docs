@@ -1,0 +1,230 @@
+---
+title: Building a Relaying Server with Sequence
+---
+
+With Sequence, you can create a smart contract wallet your server can use to dispatch transactions for your users
+without you having to be worried about transaction speed, throughput and re-orgs.
+
+<Info> Sequentual Transactions <br />
+By default, Sequence transactions will be executed sequentially. </Info>
+
+## Nodejs Server
+
+Your server will need an EOA wallet that will be able to sign messages. It will be the owner of your server-side Sequence
+wallet which will be used to dispatch transactions.
+
+This Sequence wallet should have the correct ownership at your contract level, not the EOA.
+Also, the Sequence wallet should be sufficiently funded in order to pay fees needed by the relayer to dispatch your transactions.
+
+Using this approach - versus the next section (with sponsoring) - includes the ability to pay for gas in any available currency by our relayer (e.g. 'MATIC', 'DAI', 'USDC', 'WETH').
+
+```ts
+import { RpcRelayer } from '@0xsequence/relayer'
+import { Wallet } from '@0xsequence/wallet'
+import { ethers } from 'ethers'
+
+// Get a provider
+const provider = new ethers.providers.JsonRpcProvider('https://nodes.sequence.app/polygon')
+
+// Create your server EOA
+const walletEOA = new ethers.Wallet(serverPrivateKey, provider)
+
+// Create your rpc relayer instance with relayer node you want to use
+const relayer = new RpcRelayer({url: 'https://polygon-relayer.sequence.app', provider: provider})
+
+// Create your Sequence server wallet, controlled by your server EOA, and connect it to the relayer
+const wallet = (await Wallet.singleOwner(walletEOA)).connect(provider, relayer)
+
+// Craft your transaction
+const erc721Interface = new ethers.utils.Interface([
+  'function safeTransferFrom(address _from, address _to, uint256 _tokenId)'
+])
+
+const data = erc721Interface.encodeFunctionData(
+  'safeTransferFrom', [senderAddress, recipientAddress, id]
+)
+
+const txn = {
+  to: erc721TokenAddress,
+  data
+}
+
+// Request the possible fee options the relayer will accept for this transaction
+const [config, context] = await Promise.all([wallet.getWalletConfig(), wallet.getWalletContext()])
+const { options, quote } = await relayer.getFeeOptions(config[0], context, txn /* , txn2, txn3, etc... */)
+
+
+
+// Choose a fee from the list of options returned by the relayer
+// MATIC is native to Polygon and needs to be handled differently than other ERC-20 tokens like USDC
+
+// === vvv To pay the fee in native MATIC: vvv ===
+const option = options.find(option => option.token.symbol === 'MATIC')
+if (!option) {
+  throw Error(`relayer doesn't support MATIC fees`)
+}
+
+// Craft the MATIC fee payment transaction
+// revertOnError: true is required for fee payments
+const feeTxn = {
+  to: option.to,
+  value: option.value,
+  gasLimit: option.gasLimit,
+  revertOnError: true
+}
+// === ^^^ MATIC fee ^^^ ===
+
+
+
+// === vvv To pay the fee in USDC: vvv ===
+const option = options.find(option => option.token.symbol === 'USDC')
+if (!option) {
+  throw Error(`relayer doesn't support USDC fees`)
+}
+
+const erc20Interface = new ethers.utils.Interface([
+  'function transfer(address _to, uint256 _value)'
+])
+
+// Craft the USDC fee payment transaction
+// revertOnError: true is required for fee payments
+const feeTxn = {
+  to: option.token.contractAddress,
+  gasLimit: option.gasLimit,
+  data: erc20Interface.encodeFunctionData('transfer', [option.to, option.value]),
+  revertOnError: true
+}
+// === ^^^ USDC fee ^^^ ===
+
+
+
+// Send your transaction with the fee and quote to the relayer for dispatch
+const txnResponse = await wallet.sendTransaction([txn, feeTxn], undefined, undefined, quote)
+
+// Wait for transaction to be mined
+const txnReceipt = await txnResponse.wait()
+
+// Check if transaction was successful 
+if (txnReceipt.status != 1) {
+  console.log(`Unexpected status: ${txnReceipt.status}`)
+}
+
+```
+
+## Nodejs Server with Gas Sponsoring using Sequence Builder
+
+<Tip> Need access to our Sequence Builder? <br />
+Reach out to us by email @ hello@sequence.io or complete our Sequence Pro form to hear back: https://pro.sequence.xyz/. </Tip>
+
+If you want to have your transactions sponsored & paid for with a credit card, you can follow the below steps before beginning your code, at the following link: https://sequence.build/ 
+
+By sponsoring your transaction, you can now just send the transaction without a fee object and not have to fund the smart contract wallet before relaying any transactions.
+
+<Info> Already Deployed Contract <br />
+For this example, we assume you have a smart contract deployed with a contract address to include in the last step. </Info>
+
+### A. Create Dapp
+
+![Sequence builder create app](/assets/images/builder/builder_create_dapp.png)
+
+### B. New Dapp
+
+![Sequence builder new dapp](/assets/images/builder/builder_new_dapp.png)
+
+### C.1 Gas Tank
+
+![Sequence builder gas tank](/assets/images/builder/builder_gas_tank.png)
+
+### C.2 Add Gas
+
+![Sequence builder add gas](/assets/images/builder/builder_add_gas.png)
+
+### C.3 Add Sponsored Address
+
+![Sequence builder add sponsored address](/assets/images/builder/builder_add_sponsored_address.png)
+
+The following is example code that implements a relayed transaction, same as the above example (i.e. Nodejs Server) but without fees, taken care of by the Sequence Builder.
+
+```ts
+import { RpcRelayer } from '@0xsequence/relayer'
+import { Wallet } from '@0xsequence/wallet'
+import { ethers } from 'ethers'
+
+// Get a provider
+const provider = new ethers.providers.JsonRpcProvider('https://nodes.sequence.app/polygon')
+
+// Create your server EOA
+const walletEOA = new ethers.Wallet(serverPrivateKey, provider)
+
+// Create your rpc relayer instance with relayer node you want to use
+const relayer = new RpcRelayer({url: 'https://polygon-relayer.sequence.app', provider: provider})
+
+// Create your Sequence server wallet, controlled by your server EOA, and connect it to the relayer
+const wallet = (await Wallet.singleOwner(walletEOA)).connect(provider, relayer)
+
+// Craft your transaction
+const erc721Interface = new ethers.utils.Interface([
+  'function safeTransferFrom(address _from, address _to, uint256 _tokenId)'
+])
+
+const data = erc721Interface.encodeFunctionData(
+  'safeTransferFrom', [senderAddress, recipientAddress, id]
+)
+
+const txn = {
+  to: erc721TokenAddress,
+  data
+}
+
+// Send your transaction to the relayer for dispatch
+const txnResponse = await wallet.sendTransaction([txn])
+
+// Wait for transaction to be mined
+const txnReceipt = await txnResponse.wait()
+
+// Check if transaction was successful 
+if (txnReceipt.status != 1) {
+  console.log(`Unexpected status: ${txnReceipt.status}`)
+}
+```
+
+## Parallel Transactions
+
+If you want to send multiple independent transactions without needing to batch them, you can also send them in distinct nonce spaces.
+Using distinct nonce spaces for your transactions signals to the relayer that there's no dependency between them and that
+they can be executed on-chain in any order.
+
+This allows the transactions to be dispatched immediately in an unbuffered way without having to wait for a full batch.
+Here is an example of how to do that:
+
+```js
+// Import sequence nonce encoding function
+import { encodeNonce } from '@0xsequence/transactions';
+
+// Generate random nonce spaces with ~0% probability of collision
+const randomNonceSpace1 = ethers.BigNumber.from(ethers.utils.hexlify(ethers.utils.randomBytes(20)))
+const randomNonceSpace2 = ethers.BigNumber.from(ethers.utils.hexlify(ethers.utils.randomBytes(20)))
+
+// Generate transactions
+const txn1 = {
+  to: tokenContract.address,
+  data: erc20Interface.encodeFunctionData(
+    'transfer', [recipient1, amount1]
+  ),
+  nonce: encodeNonce(randomNonceSpace1, 0)
+}
+
+const txn2 = {
+  to: tokenContract.address,
+  data: erc20Interface.encodeFunctionData(
+    'transfer', [recipient2, amount2]
+  ),
+  nonce: encodeNonce(randomNonceSpace2, 0)
+}
+
+// Dispatch transactions, which can now be executed in parallel
+const txnResponse = await wallet.sendTransactionBatch([txn1, txn2])
+```
+
+If batching transactions is not a problem for your use-case, you can call `await wallet.sendTransactionBatch(txns)`.
+You can read more about batch transactions in [Sending Batched Transactions](/wallet/guides/send-batch-transactions).
